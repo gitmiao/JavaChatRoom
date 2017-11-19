@@ -1,0 +1,13 @@
+++++++++++++++++++++++
+  Java Chat Room 
+
+++++++++++++++++++++++
+
+Description
+The chat room program is based on a client server model consisting of one chat server and multiple chat clients over TCP connections. The server is mainly used to authenticate the chat clients and direct the chat messages (online or offline) to one another. Besides, the server also support commands that clients can use.
+
+Environment
+Java, Eclipse.
+
++++++++++++++++++++++++
+
