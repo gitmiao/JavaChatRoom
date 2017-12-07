@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import server.Message;
+import server.RequestLoginInfoMsg;
 
 public class Client {
 	private final List<String> userInputs;
@@ -43,6 +44,36 @@ public class Client {
 	synchronized List<Message> getMessageFromServerQueue() {
 		return messagesFromServer;
 	}
+	synchronized void processInput() {
+		final List<Message> serverMsgQueue = getMessageFromServerQueue();
+		if (serverMsgQueue.isEmpty()) {
+			return;
+		}
+		// process the first unprocessed message
+		final Message messageFromServer = serverMsgQueue.get(0);
+		if (messageFromServer instanceof RequestLoginInfoMsg) {
+			final String input = consumeUserInputOrNull();
+			if (input != null) {
+				if (incompleteMessage.size() == 1) {
+					userName = incompleteMessage.remove(0);
+					completeMessage();
+					//send login info here !!!!
+				} else {
+					incompleteMessage.add(input);
+				}
+			}
+		} 
+	}
+	private String consumeUserInputOrNull() {
+		final List<String> userInputs = getUserInputsBuffer();
+		if (userInputs.isEmpty()) {
+			return null;
+		}
+		return userInputs.remove(0);
+	}
+	private void completeMessage() {
+		getMessageFromServerQueue().remove(0);
+	}
 	
 	private void start(final String[] args) {
 		final String ipAddress = args[0];
@@ -54,10 +85,10 @@ public class Client {
 			final InputStream inStream = s.getInputStream();
 			serverInputStream = new BufferedReader(new InputStreamReader(
 					inStream));
-			//Runnable r2 = new ServerInputHandler(serverInputStream, this);
+			Runnable r2 = new ServerInputHandler(serverInputStream, this);
 
 			userInputStream = new Scanner(System.in);
-			//Runnable r = new UserInputsReader(userInputStream, this);
+			Runnable r = new UserInputsReader(userInputStream, this);
 
 		} catch (UnknownHostException e) {
 			throw new RuntimeException(e);
